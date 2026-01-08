@@ -13,7 +13,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import template.quarkus.server.service.SyncFileServiceRegistry;
+import template.quarkus.common.sync.SyncFileServiceRegistry;
 
 @Singleton
 public class NodeConfig {

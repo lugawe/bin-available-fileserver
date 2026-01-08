@@ -1,4 +1,4 @@
-package template.quarkus.server.service;
+package template.quarkus.common.sync;
 
 import java.net.URI;
 import java.util.*;
@@ -7,9 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import jakarta.inject.Singleton;
 
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
-import template.quarkus.common.ChaosSyncFileService;
-import template.quarkus.common.SyncFileRESTService;
-import template.quarkus.common.SyncFileService;
 
 @Singleton
 public class SyncFileServiceRegistry {

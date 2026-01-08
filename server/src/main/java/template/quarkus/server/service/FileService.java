@@ -8,8 +8,9 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import template.quarkus.common.SyncFileService;
 import template.quarkus.common.UpdatePackage;
+import template.quarkus.common.sync.SyncFileService;
+import template.quarkus.common.sync.SyncFileServiceRegistry;
 
 @ApplicationScoped
 public class FileService {
