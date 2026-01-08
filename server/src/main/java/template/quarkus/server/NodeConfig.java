@@ -1,10 +1,8 @@
 package template.quarkus.server;
 
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
@@ -23,9 +21,6 @@ public class NodeConfig {
     @ConfigProperty(name = "node.id")
     private String nodeId;
 
-    @ConfigProperty(name = "node.replicas")
-    private Set<String> replicas;
-
     @Inject
     private SyncFileServiceRegistry syncFileServiceRegistry;
 
@@ -35,17 +30,6 @@ public class NodeConfig {
         try (MDC.MDCCloseable _ = MDC.putCloseable("node_id", nodeId)) {
             r.run();
         }
-    }
-
-    @PostConstruct
-    public void configure() {
-        log.info("Start Node {}", nodeId);
-        inContext(() -> {
-            for (String replica : replicas) {
-                log.info("Create Sync REST Client for {}", replica);
-                syncFileServiceRegistry.add(replica);
-            }
-        });
     }
 
     @Scheduled(every = "30s", delay = 5, delayUnit = TimeUnit.SECONDS)
@@ -64,7 +48,7 @@ public class NodeConfig {
     public void setDisabled(boolean die) {
         if (die) {
             log.error("Node {} is DEAD! Shutting down...", nodeId);
-            System.exit(1);
+            Runtime.getRuntime().halt(1);
         } else {
             log.error("Node {} is down", nodeId);
         }
