@@ -1,3 +1,3 @@
 package template.quarkus.common;
 
-public record FileContent(String content) {}
+public record FileContent(byte[] content) {}

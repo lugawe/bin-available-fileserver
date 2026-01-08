@@ -1,8 +1,6 @@
 package template.quarkus.server.service;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -18,7 +16,8 @@ public class FileService {
 
     private static final Logger log = LoggerFactory.getLogger(FileService.class);
 
-    private final Map<String, String> storage = new ConcurrentHashMap<>();
+    @Inject
+    private FileStorage fileStorage;
 
     @Inject
     private SyncFileServiceRegistry syncFileServiceRegistry;
@@ -33,15 +32,15 @@ public class FileService {
     }
 
     public void store(UpdatePackage updatePackage) {
-        // TODO store
+        fileStorage.write(updatePackage.getFiles());
     }
 
     public void writeThrough(UpdatePackage updatePackage) {
-        // TODO store
+        fileStorage.write(updatePackage.getFiles());
         syncFileServiceReplicas.parallelStream().forEach(fs -> fs.sync(updatePackage));
     }
 
-    public String read(String file) {
-        return storage.get(file);
+    public byte[] read(String file) {
+        return fileStorage.read(file);
     }
 }
