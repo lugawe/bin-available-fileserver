@@ -22,7 +22,7 @@ public class NodeConfig {
     public NodeConfig() {}
 
     private void inContext(Runnable r) {
-        try (MDC.MDCCloseable _ = MDC.putCloseable("node_id", nodeId)) {
+        try (MDC.MDCCloseable c = MDC.putCloseable("node_id", nodeId)) {
             r.run();
         }
     }

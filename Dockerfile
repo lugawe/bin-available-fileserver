@@ -1,6 +1,6 @@
 # BUILD
 
-FROM maven:3-eclipse-temurin-25-alpine AS build
+FROM maven:3-eclipse-temurin-21-alpine AS build
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ RUN --mount=type=cache,target=/root/.m2 mvn -B clean package -DskipTests
 
 # RUNTIME
 
-FROM eclipse-temurin:25-jre-alpine AS runtime
+FROM eclipse-temurin:21-jre-alpine AS runtime
 
 RUN addgroup -S quarkus && adduser -S -G quarkus quarkus
 
