@@ -14,16 +14,21 @@ public class Blocker {
 
     private static final Logger log = LoggerFactory.getLogger(Blocker.class);
 
+    private final Object lock = new Object();
+
     private boolean enabled = true;
 
     public Blocker() {}
 
     @ConsumeEvent(Events.ALIVE_NAME)
     public void consume(String value) {
-        if (Events.ALIVE_DOWN.equals(value)) {
-            enabled = false;
-        } else if (Events.ALIVE_UP.equals(value)) {
-            enabled = true;
+        synchronized (lock) {
+            if (Events.ALIVE_DOWN.equals(value)) {
+                enabled = false;
+            } else if (Events.ALIVE_UP.equals(value)) {
+                enabled = true;
+                lock.notifyAll();
+            }
         }
     }
 
@@ -35,16 +40,17 @@ public class Blocker {
     }
 
     public <T> T blockIfDown(Supplier<T> supplier) {
-        if (enabled) {
-            return supplier.get();
-        }
-        while (!enabled) {
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-                log.error("Interrupted", e);
+        synchronized (lock) {
+            while (!enabled) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException("Interrupted while waiting", e);
+                }
             }
         }
-        throw new RuntimeException();
+
+        return supplier.get();
     }
 }
