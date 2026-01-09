@@ -1,33 +1,20 @@
 package template.quarkus.server.resource;
 
-import io.quarkus.vertx.ConsumeEvent;
-import template.quarkus.common.Events;
+import jakarta.inject.Inject;
+
 import template.quarkus.common.ping.PingRESTService;
+import template.quarkus.common.util.Blocker;
 
 public class PingServiceResource implements PingRESTService {
 
-    private boolean enabled = true;
+    @Inject
+    private Blocker blocker;
 
     public PingServiceResource() {}
 
-    @ConsumeEvent(Events.ALIVE_NAME)
-    public void consume(String value) {
-        if (Events.ALIVE_DOWN.equals(value)) {
-            setEnabled(false);
-        } else if (Events.ALIVE_UP.equals(value)) {
-            setEnabled(true);
-        }
-    }
-
     @Override
     public PingPackage ping(PingPackage ping) {
-        if (enabled) {
-            return new PingPackage("pong");
-        }
-        throw new RuntimeException("TODO");
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+        blocker.blockIfDown();
+        return new PingPackage("pong");
     }
 }

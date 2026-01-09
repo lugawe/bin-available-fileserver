@@ -5,32 +5,28 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import template.quarkus.common.UpdatePackage;
+import template.quarkus.common.util.Blocker;
 
 public class ChaosSyncFileService implements SyncFileService {
 
     private static final Logger log = LoggerFactory.getLogger(ChaosSyncFileService.class);
 
+    private final Blocker blocker;
     private final SyncFileService syncFileService;
 
-    private boolean enabled = true;
-
-    public ChaosSyncFileService(SyncFileService syncFileService) {
+    public ChaosSyncFileService(Blocker blocker, SyncFileService syncFileService) {
+        this.blocker = blocker;
         this.syncFileService = syncFileService;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
     }
 
     @Override
     public void sync(UpdatePackage updatePackage) {
-        if (enabled) {
-            double v = ThreadLocalRandom.current().nextDouble();
-            if (v < 0.9) {
-                syncFileService.sync(updatePackage);
-            } else {
-                log.error("Failed to sync... < 90%");
-            }
+        blocker.blockIfDown();
+        double v = ThreadLocalRandom.current().nextDouble();
+        if (v < 0.9) {
+            syncFileService.sync(updatePackage);
+        } else {
+            log.error("Failed to sync... < 90%");
         }
     }
 }
