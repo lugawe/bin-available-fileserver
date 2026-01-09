@@ -20,13 +20,17 @@ public class ClientFileServiceResource implements ClientFileRESTService {
 
     @Override
     public void write(UpdatePackage updatePackage) {
-        blocker.blockIfDown();
-        fileService.writeThrough(updatePackage);
+        blocker.blockIfDown(() -> {
+            //
+            fileService.writeThrough(updatePackage);
+        });
     }
 
     @Override
     public FileContent read(String file) {
-        blocker.blockIfDown();
-        return new FileContent(fileService.read(file));
+        return blocker.blockIfDown(() -> {
+            //
+            return new FileContent(fileService.read(file));
+        });
     }
 }

@@ -1,5 +1,7 @@
 package template.quarkus.common.util;
 
+import java.util.function.Supplier;
+
 import jakarta.enterprise.context.ApplicationScoped;
 
 import io.quarkus.vertx.ConsumeEvent;
@@ -25,7 +27,17 @@ public class Blocker {
         }
     }
 
-    public void blockIfDown() {
+    public void blockIfDown(Runnable runnable) {
+        blockIfDown(() -> {
+            runnable.run();
+            return null;
+        });
+    }
+
+    public <T> T blockIfDown(Supplier<T> supplier) {
+        if (enabled) {
+            return supplier.get();
+        }
         while (!enabled) {
             try {
                 Thread.sleep(20);
@@ -33,5 +45,6 @@ public class Blocker {
                 log.error("Interrupted", e);
             }
         }
+        throw new RuntimeException();
     }
 }

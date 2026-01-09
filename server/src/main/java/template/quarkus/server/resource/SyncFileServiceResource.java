@@ -19,7 +19,9 @@ public class SyncFileServiceResource implements SyncFileRESTService {
 
     @Override
     public void sync(UpdatePackage updatePackage) {
-        blocker.blockIfDown();
-        fileService.store(updatePackage);
+        blocker.blockIfDown(() -> {
+            //
+            fileService.store(updatePackage);
+        });
     }
 }

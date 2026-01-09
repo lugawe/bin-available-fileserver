@@ -21,12 +21,13 @@ public class ChaosSyncFileService implements SyncFileService {
 
     @Override
     public void sync(UpdatePackage updatePackage) {
-        blocker.blockIfDown();
-        double v = ThreadLocalRandom.current().nextDouble();
-        if (v < 0.9) {
-            syncFileService.sync(updatePackage);
-        } else {
-            log.error("Failed to sync... < 90%");
-        }
+        blocker.blockIfDown(() -> {
+            double v = ThreadLocalRandom.current().nextDouble();
+            if (v < 0.9) {
+                syncFileService.sync(updatePackage);
+            } else {
+                log.error("Failed to sync... < 90%");
+            }
+        });
     }
 }

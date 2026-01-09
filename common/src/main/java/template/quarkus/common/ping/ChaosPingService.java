@@ -20,13 +20,14 @@ public class ChaosPingService implements PingService {
 
     @Override
     public PingPackage ping(PingPackage ping) {
-        blocker.blockIfDown();
-        double v = ThreadLocalRandom.current().nextDouble();
-        if (v < 0.9) {
-            return pingService.ping(ping);
-        } else {
-            log.error("Failed to sync... < 90%");
-            throw new RuntimeException();
-        }
+        return blocker.blockIfDown(() -> {
+            double v = ThreadLocalRandom.current().nextDouble();
+            if (v < 0.9) {
+                return pingService.ping(ping);
+            } else {
+                log.error("Failed to sync... < 90%");
+                throw new RuntimeException();
+            }
+        });
     }
 }
