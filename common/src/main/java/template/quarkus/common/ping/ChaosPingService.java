@@ -15,6 +15,8 @@ public class ChaosPingService implements PingService {
         this.pingService = pingService;
     }
 
+    public void setEnabled(boolean enabled) {}
+
     @Override
     public PingPackage ping(PingPackage ping) {
         double v = ThreadLocalRandom.current().nextDouble();

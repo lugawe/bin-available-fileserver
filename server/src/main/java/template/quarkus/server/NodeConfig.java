@@ -3,18 +3,24 @@ package template.quarkus.server;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import io.quarkus.scheduler.Scheduled;
+import io.vertx.core.eventbus.EventBus;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import template.quarkus.common.Events;
 
 @Singleton
 public class NodeConfig {
 
     private static final Logger log = LoggerFactory.getLogger(NodeConfig.class);
+
+    @Inject
+    private EventBus eventBus;
 
     @ConfigProperty(name = "node.id")
     private String nodeId;
@@ -43,14 +49,16 @@ public class NodeConfig {
     public void setDisabled(boolean die) {
         if (die) {
             log.error("Node {} is DEAD! Shutting down...", nodeId);
-            Runtime.getRuntime().halt(1);
+            Runtime.getRuntime().halt(1); // Instant shutdown
         } else {
             log.error("Node {} is down", nodeId);
+            eventBus.publish(Events.ALIVE_NAME, Events.ALIVE_DOWN);
         }
     }
 
     public void setEnabled() {
         log.info("Node {} is back", nodeId);
+        eventBus.publish(Events.ALIVE_NAME, Events.ALIVE_UP);
     }
 
     public String getNodeId() {

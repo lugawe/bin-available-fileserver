@@ -16,6 +16,8 @@ public class ChaosSyncFileService implements SyncFileService {
         this.syncFileService = syncFileService;
     }
 
+    public void setEnabled(boolean enabled) {}
+
     @Override
     public void sync(UpdatePackage updatePackage) {
         double v = ThreadLocalRandom.current().nextDouble();
