@@ -1,11 +1,8 @@
 package template.quarkus.server;
 
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import io.quarkus.scheduler.Scheduled;
@@ -13,7 +10,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import template.quarkus.server.service.SyncFileServiceRegistry;
 
 @Singleton
 public class NodeConfig {
@@ -23,29 +19,12 @@ public class NodeConfig {
     @ConfigProperty(name = "node.id")
     private String nodeId;
 
-    @ConfigProperty(name = "node.replicas")
-    private Set<String> replicas;
-
-    @Inject
-    private SyncFileServiceRegistry syncFileServiceRegistry;
-
     public NodeConfig() {}
 
     private void inContext(Runnable r) {
-        try (MDC.MDCCloseable _ = MDC.putCloseable("node_id", nodeId)) {
+        try (MDC.MDCCloseable c = MDC.putCloseable("node_id", nodeId)) {
             r.run();
         }
-    }
-
-    @PostConstruct
-    public void configure() {
-        log.info("Start Node {}", nodeId);
-        inContext(() -> {
-            for (String replica : replicas) {
-                log.info("Create Sync REST Client for {}", replica);
-                syncFileServiceRegistry.add(replica);
-            }
-        });
     }
 
     @Scheduled(every = "30s", delay = 5, delayUnit = TimeUnit.SECONDS)
@@ -64,7 +43,7 @@ public class NodeConfig {
     public void setDisabled(boolean die) {
         if (die) {
             log.error("Node {} is DEAD! Shutting down...", nodeId);
-            System.exit(1);
+            Runtime.getRuntime().halt(1);
         } else {
             log.error("Node {} is down", nodeId);
         }

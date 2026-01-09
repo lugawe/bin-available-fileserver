@@ -1,9 +1,10 @@
-package template.quarkus.common;
+package template.quarkus.common.sync;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import template.quarkus.common.UpdatePackage;
 
 public class ChaosSyncFileService implements SyncFileService {
 
