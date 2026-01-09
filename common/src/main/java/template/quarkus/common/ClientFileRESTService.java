@@ -4,7 +4,7 @@ import jakarta.ws.rs.*;
 
 // Used by Client
 @Path("/files")
-public interface ClientFileService {
+public interface ClientFileRESTService {
 
     @POST
     @Path("/")
