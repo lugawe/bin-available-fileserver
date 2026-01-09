@@ -12,19 +12,25 @@ public class ChaosSyncFileService implements SyncFileService {
 
     private final SyncFileService syncFileService;
 
+    private boolean enabled = true;
+
     public ChaosSyncFileService(SyncFileService syncFileService) {
         this.syncFileService = syncFileService;
     }
 
-    public void setEnabled(boolean enabled) {}
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     @Override
     public void sync(UpdatePackage updatePackage) {
-        double v = ThreadLocalRandom.current().nextDouble();
-        if (v < 0.9) {
-            syncFileService.sync(updatePackage);
-        } else {
-            log.error("Failed to sync... < 90%");
+        if (enabled) {
+            double v = ThreadLocalRandom.current().nextDouble();
+            if (v < 0.9) {
+                syncFileService.sync(updatePackage);
+            } else {
+                log.error("Failed to sync... < 90%");
+            }
         }
     }
 }

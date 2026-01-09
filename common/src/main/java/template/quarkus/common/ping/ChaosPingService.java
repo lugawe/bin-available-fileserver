@@ -11,19 +11,25 @@ public class ChaosPingService implements PingService {
 
     private final PingService pingService;
 
+    private boolean enabled = true;
+
     public ChaosPingService(PingService pingService) {
         this.pingService = pingService;
     }
 
-    public void setEnabled(boolean enabled) {}
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     @Override
     public PingPackage ping(PingPackage ping) {
-        double v = ThreadLocalRandom.current().nextDouble();
-        if (v < 0.9) {
-            return pingService.ping(ping);
-        } else {
-            log.error("Failed to sync... < 90%");
+        if (enabled) {
+            double v = ThreadLocalRandom.current().nextDouble();
+            if (v < 0.9) {
+                return pingService.ping(ping);
+            } else {
+                log.error("Failed to sync... < 90%");
+            }
         }
         throw new RuntimeException("TODO");
     }
