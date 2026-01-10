@@ -7,11 +7,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import template.quarkus.common.UpdatePackage;
 import template.quarkus.common.sync.SyncFileServiceRegistry;
+import template.quarkus.common.util.Blocker;
 
 @ApplicationScoped
 public class FileService {
 
     private static final Logger log = LoggerFactory.getLogger(FileService.class);
+
+    @Inject
+    private Blocker blocker;
 
     @Inject
     private FileStorage fileStorage;
@@ -28,7 +32,8 @@ public class FileService {
     public void writeThrough(UpdatePackage updatePackage) {
         fileStorage.write(updatePackage.getFiles());
 
-        syncFileServiceRegistry.getAllRegistered().parallelStream().forEach(fs -> fs.sync(updatePackage));
+        syncFileServiceRegistry.getAllRegistered().parallelStream()
+                .forEach(fs -> blocker.maybeSendMessage(() -> fs.sync(updatePackage)));
     }
 
     public byte[] read(String file) {
