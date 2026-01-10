@@ -53,4 +53,8 @@ public class Blocker {
 
         return supplier.get();
     }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
 }
