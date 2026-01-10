@@ -1,10 +1,10 @@
-package template.quarkus.server;
+package template.quarkus.server.service;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 
 import io.quarkus.scheduler.Scheduled;
 import io.vertx.core.eventbus.EventBus;
@@ -14,10 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import template.quarkus.common.Events;
 
-@Singleton
-public class NodeConfig {
+@ApplicationScoped
+public class ScheduledChaosService {
 
-    private static final Logger log = LoggerFactory.getLogger(NodeConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(ScheduledChaosService.class);
 
     @Inject
     private EventBus eventBus;
@@ -25,7 +25,7 @@ public class NodeConfig {
     @ConfigProperty(name = "node.id")
     private String nodeId;
 
-    public NodeConfig() {}
+    public ScheduledChaosService() {}
 
     private void inContext(Runnable r) {
         try (MDC.MDCCloseable c = MDC.putCloseable("node_id", nodeId)) {
@@ -33,7 +33,7 @@ public class NodeConfig {
         }
     }
 
-    @Scheduled(every = "30s", delay = 5, delayUnit = TimeUnit.SECONDS)
+    @Scheduled(every = "20s", delay = 10, delayUnit = TimeUnit.SECONDS)
     public void maybeDisable() {
         double v = ThreadLocalRandom.current().nextDouble();
         inContext(() -> {
@@ -59,9 +59,5 @@ public class NodeConfig {
     public void setEnabled() {
         log.info("Node {} is back", nodeId);
         eventBus.publish(Events.ALIVE_NAME, Events.ALIVE_UP);
-    }
-
-    public String getNodeId() {
-        return nodeId;
     }
 }
