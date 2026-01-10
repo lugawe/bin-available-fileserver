@@ -1,5 +1,6 @@
 package template.quarkus.common.util;
 
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -52,6 +53,15 @@ public class Blocker {
         }
 
         return supplier.get();
+    }
+
+    public void maybeSendMessage(Runnable r) {
+        double v = ThreadLocalRandom.current().nextDouble();
+        if (v < 0.9) {
+            r.run();
+        } else {
+            log.error("Failed to send message... < 90%");
+        }
     }
 
     public boolean isEnabled() {
