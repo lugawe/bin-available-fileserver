@@ -1,14 +1,8 @@
 package template.quarkus.common.ping;
 
-import java.util.concurrent.ThreadLocalRandom;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import template.quarkus.common.util.Blocker;
 
 public class ChaosPingService implements PingService {
-
-    private static final Logger log = LoggerFactory.getLogger(ChaosPingService.class);
 
     private final Blocker blocker;
     private final PingService pingService;
@@ -20,14 +14,6 @@ public class ChaosPingService implements PingService {
 
     @Override
     public PingPackage ping(PingPackage ping) {
-        return blocker.blockIfDown(() -> {
-            double v = ThreadLocalRandom.current().nextDouble();
-            if (v < 0.9) {
-                return pingService.ping(ping);
-            } else {
-                log.error("Failed to sync... < 90%");
-                throw new RuntimeException();
-            }
-        });
+        return blocker.blockIfDown(() -> pingService.ping(ping));
     }
 }
