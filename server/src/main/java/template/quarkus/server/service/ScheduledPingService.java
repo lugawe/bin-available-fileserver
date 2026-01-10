@@ -4,8 +4,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import io.quarkus.scheduler.Scheduled;
+import io.vertx.core.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import template.quarkus.common.Events;
 import template.quarkus.common.ping.PingService;
 import template.quarkus.common.ping.PingServiceRegistry;
 import template.quarkus.common.util.Blocker;
@@ -21,21 +23,24 @@ public class ScheduledPingService {
     private Blocker blocker;
 
     @Inject
+    private EventBus eventBus;
+
+    @Inject
     private PingServiceRegistry pingServiceRegistry;
 
     public ScheduledPingService() {}
 
     @Scheduled(every = "3s")
     public void scheduledPinging() {
-        blocker.maybeSendMessage(() -> {
-            PingService.PingPackage pingPackage = new PingService.PingPackage("ping");
-            pingServiceRegistry.getAllRegisteredMap().forEach((k, v) -> {
-                try {
-                    v.ping(pingPackage);
-                } catch (Exception e) {
-                    log.warn("Node {} is not available", k);
-                }
-            });
+        // TODO message los
+        PingService.PingPackage pingPackage = new PingService.PingPackage("ping");
+        pingServiceRegistry.getAllRegisteredMap().forEach((k, v) -> {
+            try {
+                v.ping(pingPackage);
+                eventBus.publish(Events.NODE_NAME, Events.NODE_UP + k);
+            } catch (Exception e) {
+                eventBus.publish(Events.NODE_NAME, Events.NODE_DOWN + k);
+            }
         });
     }
 }
