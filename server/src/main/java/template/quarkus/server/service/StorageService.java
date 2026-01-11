@@ -28,6 +28,9 @@ public class StorageService {
     @Inject
     private SyncFileServiceRegistry syncFileServiceRegistry;
 
+    @Inject
+    private ElectionService electionService;
+
     public StorageService() {}
 
     public int store(UpdateEntry updateEntry) {
@@ -47,9 +50,11 @@ public class StorageService {
     }
 
     private void writeSync() {
-        syncFileServiceRegistry.getAllRegistered().parallelStream().forEach(fs -> {
-            syncHelper(fs);
-        });
+        if (electionService.isMain()) {
+            syncFileServiceRegistry.getAllRegistered().parallelStream().forEach(fs -> {
+                syncHelper(fs);
+            });
+        }
     }
 
     private void syncHelper(SyncFileService fs) {

@@ -22,10 +22,17 @@ public class Storage {
     public Storage() {}
 
     public int writeReplicaUpdate(UpdateEntry message) {
-        if (message.untilVersion() <= latestVersion) return -2;
-        if (message.afterVersion() - latestVersion != 0) return latestVersion;
+        if (message.untilVersion() < latestVersion) {
+            log.info("return -2");
+            return -2;
+        }
+        if (message.afterVersion() - latestVersion != 0) {
+            log.info("return {}", latestVersion);
+            return latestVersion;
+        }
         message.files().forEach(fileVersionEntry -> store.put(fileVersionEntry.name(), fileVersionEntry));
         latestVersion = message.untilVersion();
+        log.info("return 0");
         return 0;
     }
 
