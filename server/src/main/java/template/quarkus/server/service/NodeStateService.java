@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 
 import io.quarkus.scheduler.Scheduled;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.impl.ConcurrentHashSet;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import template.quarkus.common.Events;
 import template.quarkus.common.ping.PingService;
@@ -16,7 +17,7 @@ import template.quarkus.common.ping.PingServiceRegistry;
 @ApplicationScoped
 public class NodeStateService {
 
-    private final Set<String> activeNodes = new LinkedHashSet<>();
+    private final Set<String> activeNodes = new ConcurrentHashSet<>();
 
     @ConfigProperty(name = "node.replicas")
     private List<String> replicas;
@@ -41,9 +42,7 @@ public class NodeStateService {
 
         PingService.PingPackage pingPackage = new PingService.PingPackage("ping");
 
-        for (Map.Entry<String, PingService> entry :
-                pingServiceRegistry.getAllRegisteredMap().entrySet()) {
-
+        pingServiceRegistry.getAllRegisteredMap().entrySet().parallelStream().forEach((entry) -> {
             String nodeId = entry.getKey();
             PingService pingService = entry.getValue();
 
@@ -57,7 +56,7 @@ public class NodeStateService {
                     eventBus.publish(Events.NODE_DOWN, nodeId);
                 }
             }
-        }
+        });
     }
 
     public Set<String> getActiveNodes() {
