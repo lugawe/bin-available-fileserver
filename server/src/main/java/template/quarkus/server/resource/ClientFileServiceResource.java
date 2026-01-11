@@ -3,7 +3,6 @@ package template.quarkus.server.resource;
 import jakarta.inject.Inject;
 
 import template.quarkus.common.ClientFileRESTService;
-import template.quarkus.common.content.ChangeEntry;
 import template.quarkus.common.content.FileEntry;
 import template.quarkus.common.util.Blocker;
 import template.quarkus.server.service.StorageService;
@@ -19,10 +18,10 @@ public class ClientFileServiceResource implements ClientFileRESTService {
     public ClientFileServiceResource() {}
 
     @Override
-    public void write(ChangeEntry changeEntry) {
+    public void write(FileEntry fileEntry) {
         blocker.blockIfDown(() -> {
             //
-            storageService.writeThrough(changeEntry);
+            storageService.syncToReplicas(fileEntry);
         });
     }
 

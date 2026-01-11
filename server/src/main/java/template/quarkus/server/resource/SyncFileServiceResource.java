@@ -21,7 +21,7 @@ public class SyncFileServiceResource implements SyncFileRESTService {
     public void sync(ChangeEntry changeEntry) {
         blocker.blockIfDown(() -> {
             //
-            storageService.store(changeEntry);
+            storageService.syncLocal(changeEntry);
         });
     }
 }

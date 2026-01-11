@@ -2,7 +2,6 @@ package template.quarkus.common;
 
 import jakarta.ws.rs.*;
 
-import template.quarkus.common.content.ChangeEntry;
 import template.quarkus.common.content.FileEntry;
 
 // Used by Client
@@ -11,7 +10,7 @@ public interface ClientFileRESTService {
 
     @POST
     @Path("/")
-    void write(ChangeEntry changeEntry);
+    void write(FileEntry fileEntry);
 
     @GET
     @Path("/{file}")
