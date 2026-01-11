@@ -48,10 +48,10 @@ public class ScheduledChaosService {
 
     public void setDisabled(boolean die) {
         if (die) {
-            log.error("Node {} is DEAD! Shutting down...", nodeId);
+            log.error("I am DEAD! Shutting down...");
             Runtime.getRuntime().halt(1); // Instant shutdown
         } else {
-            log.error("Node {} is down", nodeId);
+            log.error("I am down");
             eventBus.publish(Events.ALIVE_NAME, Events.ALIVE_DOWN);
         }
     }
