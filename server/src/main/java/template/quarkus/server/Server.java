@@ -8,7 +8,8 @@ public class Server {
 
     public Server() {}
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        Thread.sleep(3000);
         Quarkus.run(args);
     }
 }
