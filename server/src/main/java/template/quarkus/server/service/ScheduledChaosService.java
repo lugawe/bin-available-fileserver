@@ -33,7 +33,7 @@ public class ScheduledChaosService {
         }
     }
 
-    @Scheduled(every = "20s", delay = 10, delayUnit = TimeUnit.SECONDS)
+    //@Scheduled(every = "20s", delay = 10, delayUnit = TimeUnit.SECONDS)
     public void maybeDisable() {
         double v = ThreadLocalRandom.current().nextDouble();
         inContext(() -> {

@@ -5,11 +5,14 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.quarkus.vertx.ConsumeEvent;
 import template.quarkus.common.content.FileEntry;
 import template.quarkus.common.content.UpdateEntry;
 import template.quarkus.common.sync.SyncFileService;
 import template.quarkus.common.sync.SyncFileServiceRegistry;
 import template.quarkus.common.util.Blocker;
+import template.quarkus.common.Events;
 
 @ApplicationScoped
 public class StorageService {
@@ -36,7 +39,8 @@ public class StorageService {
         if (noChangesInFile) return;
         writeSync();
     }
-
+    
+    @ConsumeEvent(Events.NODE_UP)
     private void writeSync(String node) {
         syncHelper(syncFileServiceRegistry.getRegistered(node));
     }
