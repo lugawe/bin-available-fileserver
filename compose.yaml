@@ -13,6 +13,7 @@ services:
       - QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT=http://bin-available-fileserver-lgtm:4317
       - NODE_ID=node-1
       - NODE_REPLICAS=node-2,node-3
+      - NODE_MAIN=true
 
   bin-available-fileserver-2:
     image: 'ghcr.io/lugawe/bin-available-fileserver:latest'
@@ -28,6 +29,7 @@ services:
       - QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT=http://bin-available-fileserver-lgtm:4317
       - NODE_ID=node-2
       - NODE_REPLICAS=node-1,node-3
+      - NODE_MAIN=false
 
   bin-available-fileserver-3:
     image: 'ghcr.io/lugawe/bin-available-fileserver:latest'
@@ -43,6 +45,7 @@ services:
       - QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT=http://bin-available-fileserver-lgtm:4317
       - NODE_ID=node-3
       - NODE_REPLICAS=node-1,node-2
+      - NODE_MAIN=false
 
   bin-available-fileserver-lgtm:
     image: 'grafana/otel-lgtm:latest'
