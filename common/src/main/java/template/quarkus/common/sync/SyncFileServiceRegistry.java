@@ -8,10 +8,12 @@ import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
+import io.quarkus.vertx.ConsumeEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import template.quarkus.common.Events;
 import template.quarkus.common.util.Blocker;
 
 @Singleton
@@ -42,6 +44,16 @@ public class SyncFileServiceRegistry {
             log.info("Create Sync REST Client for {}", replica);
             add(replica);
         }
+    }
+
+    @ConsumeEvent(Events.NODE_DOWN)
+    public void onNodeDown(String nodeId) {
+        cache.remove(nodeId);
+    }
+
+    @ConsumeEvent(Events.NODE_UP)
+    public void onNodeUp(String nodeId) {
+        add(nodeId);
     }
 
     public SyncFileService add(String nodeId) {
