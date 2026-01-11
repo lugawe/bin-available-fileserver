@@ -25,6 +25,7 @@ public class ScheduledChaosService {
     @ConfigProperty(name = "node.id")
     private String nodeId;
 
+    private boolean enabled = true;
     public ScheduledChaosService() {}
 
     private void inContext(Runnable r) {
@@ -33,14 +34,16 @@ public class ScheduledChaosService {
         }
     }
 
-    @Scheduled(every = "100s", delay = 10, delayUnit = TimeUnit.SECONDS)
+    @Scheduled(every = "30s", delay = 30, delayUnit = TimeUnit.SECONDS)
     public void maybeDisable() {
         double v = ThreadLocalRandom.current().nextDouble();
         inContext(() -> {
             if (v < 0.2) {
                 boolean die = v < 0.15;
+                if(!enabled)return;
                 setDisabled(die);
             } else {
+                if(enabled)return;
                 setEnabled();
             }
         });

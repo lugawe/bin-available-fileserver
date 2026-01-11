@@ -4,7 +4,7 @@ public interface ElectionService {
 
     record Request(String nodeId, int maxVersion) {}
 
-    record Response(boolean ok) {}
+    record Response(String NodeId, boolean ok) {}
 
     Response requestToBecomeMain(Request request);
 }

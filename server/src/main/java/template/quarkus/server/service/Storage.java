@@ -23,23 +23,23 @@ public class Storage {
 
     public int writeReplicaUpdate(UpdateEntry message) {
         if (message.untilVersion() < latestVersion) {
-            log.info("return -2");
+            log.error("Jüngere version: schwerer Fehler");
             return -2;
         }
         if (message.afterVersion() - latestVersion != 0) {
-            log.info("return {}", latestVersion);
+            log.info("localstorage benötigt Files ab Version {} nicht {}", latestVersion, message.afterVersion());
             return latestVersion;
         }
         message.files().forEach(fileVersionEntry -> store.put(fileVersionEntry.name(), fileVersionEntry));
         latestVersion = message.untilVersion();
-        log.info("return 0");
+        log.info("Files in der versionsrange ]{},{}] wurden gespeichert", message.afterVersion(), message.untilVersion());
+        printFileList();
         return 0;
     }
 
-    public boolean writeClientFile(FileEntry fileEntry) {
+    public void writeClientFile(FileEntry fileEntry) {
         latestVersion++;
         store.put(fileEntry.name(), new FileVersionEntry(fileEntry.name(), fileEntry.bytes(), latestVersion));
-        return false;
     }
 
     public FileVersionEntry getFileEntry(String filename) {

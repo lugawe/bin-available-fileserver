@@ -1,24 +1,21 @@
-package template.quarkus.client;
+package template.quarkus.server.service;
 
 import java.net.URI;
-
 import jakarta.enterprise.context.ApplicationScoped;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import template.quarkus.common.ClientFileRESTService;
 
 @ApplicationScoped
-public class RESTClient {
+public class ClientService {
 
-    @ConfigProperty(name = "client.endpoint")
-    private String endpoint;
+    private String endpoint = "localhost";
 
-    public RESTClient() {}
+    public ClientService() {}
 
     public ClientFileRESTService fileService(String nodeId) {
         return RestClientBuilder.newBuilder()
-                .baseUri(URI.create("http://" + nodeId + ":8081/api"))
+                .baseUri(URI.create("http://" + nodeId + ":3000/api"))
                 .build(ClientFileRESTService.class);
     }
 

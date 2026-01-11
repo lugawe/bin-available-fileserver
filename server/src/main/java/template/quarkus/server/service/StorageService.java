@@ -28,6 +28,9 @@ public class StorageService {
     @Inject
     private SyncFileServiceRegistry syncFileServiceRegistry;
 
+    @Inject 
+    private NodeStateService nodeStateService;
+
     @Inject
     private ElectionService electionService;
 
@@ -38,26 +41,36 @@ public class StorageService {
     }
 
     public void writeThrough(FileEntry fileEntry) {
-        boolean noChangesInFile = storage.writeClientFile(fileEntry);
-        if (noChangesInFile) return;
+        storage.writeClientFile(fileEntry);
+        log.info("File {} written to storage", fileEntry.name());
         writeSync();
     }
     
     @ConsumeEvent(value = Events.NODE_UP, blocking = true) 
-    public void writeSync(String node) { 
-        log.info("Resync of node {}", node);
-        new Thread(() -> syncHelper(syncFileServiceRegistry.getRegistered(node))).run(); 
+    public void writeSync(String node) {
+        if (electionService.isMain()) {
+            log.info("Resync of node {}", node);
+            new Thread(() -> syncHelper(syncFileServiceRegistry.getRegistered(node))).run(); 
+        }
     }
 
-    private void writeSync() {
+    public void writeSync() {
         if (electionService.isMain()) {
-            syncFileServiceRegistry.getAllRegistered().parallelStream().forEach(fs -> {
-                syncHelper(fs);
+            log.info("I am Main and will synchronize the rest with Version {}", storage.getLatestVersion());
+            nodeStateService.getActiveNodes().forEach(an -> {
+                log.info("Synchronizing to {}", an);
+                syncHelper(syncFileServiceRegistry.getRegistered(an));
             });
+        }else{
+            log.info("i am not main");
         }
     }
 
     private void syncHelper(SyncFileService fs) {
+        if(storage.getLatestVersion()==1){
+            log.error("I have no data");
+            return;
+        }
         UpdateEntry nodePackage = new UpdateEntry(
                 storage.getLatestVersion(), storage.getFilesChangedAfterVersion(storage.getLatestVersion() - 1));
         int returnStatusCode;
@@ -77,5 +90,9 @@ public class StorageService {
 
     public byte[] read(String file) {
         return storage.read(file);
+    }
+
+    public int getLatestVersion(){
+        return storage.getLatestVersion();
     }
 }

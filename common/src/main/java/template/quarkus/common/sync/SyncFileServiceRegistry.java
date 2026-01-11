@@ -24,6 +24,7 @@ public class SyncFileServiceRegistry {
     @Inject
     private Blocker blocker;
 
+
     @ConfigProperty(name = "node.replicas")
     private List<String> replicas;
 
@@ -52,7 +53,14 @@ public class SyncFileServiceRegistry {
         return Collections.unmodifiableCollection(cache.values());
     }
 
+    public Collection<SyncFileService> getAllAliveRegistered(Set<String> alive) {
+        Collection<SyncFileService> aliveNodes = new ArrayList<>();
+        cache.keySet().forEach(key -> {if(alive.contains(key)) aliveNodes.add(cache.get(key));});
+        return aliveNodes;
+    }
+
     public SyncFileService getRegistered(String nodeId) {
         return cache.get(nodeId);
     }
+
 }
