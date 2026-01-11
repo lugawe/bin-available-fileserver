@@ -15,9 +15,9 @@ public class UpdatePackage {
         this.files = files;
     }
 
-    public UpdatePackage(int untilVersion, List<FileVersionEntry> files){
+    public UpdatePackage(int untilVersion, List<FileVersionEntry> files) {
         this.untilVersion = untilVersion;
-        this.afterVersion = untilVersion -1;
+        this.afterVersion = untilVersion - 1;
         files = new ArrayList<>();
         files.addAll(files);
     }

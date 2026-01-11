@@ -52,7 +52,7 @@ public class SyncFileServiceRegistry {
         return Collections.unmodifiableCollection(cache.values());
     }
 
-    public SyncFileService getRegistered(String nodeId){
+    public SyncFileService getRegistered(String nodeId) {
         return cache.get(nodeId);
     }
 }

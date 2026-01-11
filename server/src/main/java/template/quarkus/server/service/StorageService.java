@@ -5,10 +5,8 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import template.quarkus.common.content.UpdatePackage;
-import template.quarkus.common.content.ChangeEntry;
 import template.quarkus.common.content.FileEntry;
+import template.quarkus.common.content.UpdatePackage;
 import template.quarkus.common.sync.SyncFileService;
 import template.quarkus.common.sync.SyncFileServiceRegistry;
 import template.quarkus.common.util.Blocker;
@@ -35,27 +33,32 @@ public class StorageService {
 
     public void writeThrough(FileEntry fileEntry) {
         boolean noChangesInFile = storage.writeClientFile(fileEntry);
-        if(noChangesInFile) return;
+        if (noChangesInFile) return;
         writeSync();
     }
 
-    private void writeSync(String node){
+    private void writeSync(String node) {
         syncHelper(syncFileServiceRegistry.getRegistered(node));
     }
 
-    private void writeSync(){
+    private void writeSync() {
         syncFileServiceRegistry.getAllRegistered().parallelStream().forEach(fs -> {
             syncHelper(fs);
         });
     }
 
-    private void syncHelper(SyncFileService fs){
-        UpdatePackage nodePackage = new UpdatePackage(storage.getLatestVersion(), storage.getFilesChangedAfterVersion(storage.getLatestVersion()-1));
-            int returnStatusCode;
-            do{
-                returnStatusCode = fs.sync(nodePackage);
-                if(returnStatusCode > 0)nodePackage = new UpdatePackage(storage.getLatestVersion(),returnStatusCode,storage.getFilesChangedAfterVersion(returnStatusCode));
-            } while (returnStatusCode != 0);
+    private void syncHelper(SyncFileService fs) {
+        UpdatePackage nodePackage = new UpdatePackage(
+                storage.getLatestVersion(), storage.getFilesChangedAfterVersion(storage.getLatestVersion() - 1));
+        int returnStatusCode;
+        do {
+            returnStatusCode = fs.sync(nodePackage);
+            if (returnStatusCode > 0)
+                nodePackage = new UpdatePackage(
+                        storage.getLatestVersion(),
+                        returnStatusCode,
+                        storage.getFilesChangedAfterVersion(returnStatusCode));
+        } while (returnStatusCode != 0);
     }
 
     public byte[] read(String file) {
