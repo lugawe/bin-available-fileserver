@@ -32,9 +32,10 @@ public class Storage {
         changeEntries.add(changeEntry);
     }
 
-    public void write(FileEntry fileEntry) {
+    public ChangeEntry write(FileEntry fileEntry) {
         ChangeEntry changeEntry = new ChangeEntry(getNextVersion(), Collections.singletonList(fileEntry));
         write(changeEntry);
+        return changeEntry;
     }
 
     public byte[] read(String file) {

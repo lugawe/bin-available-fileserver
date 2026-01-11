@@ -31,7 +31,7 @@ public class StorageService {
     }
 
     public void syncToReplicas(FileEntry fileEntry) {
-        storage.write(fileEntry);
+        ChangeEntry changeEntry = storage.write(fileEntry);
 
         syncFileServiceRegistry.getAllRegistered().parallelStream()
                 .forEach(fs -> blocker.maybeSendMessage(() -> fs.sync(changeEntry)));
