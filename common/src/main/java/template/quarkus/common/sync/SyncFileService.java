@@ -1,9 +1,9 @@
 package template.quarkus.common.sync;
 
-import template.quarkus.common.content.ChangeEntry;
+import template.quarkus.common.content.UpdatePackage;
 
 // Used internal by Servers
 public interface SyncFileService {
 
-    void sync(ChangeEntry changeEntry);
+    int sync(UpdatePackage updatePackage);
 }

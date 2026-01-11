@@ -19,10 +19,10 @@ public class ClientFileServiceResource implements ClientFileRESTService {
     public ClientFileServiceResource() {}
 
     @Override
-    public void write(ChangeEntry changeEntry) {
+    public void write(FileEntry fileEntry) {
         blocker.blockIfDown(() -> {
             //
-            storageService.writeThrough(changeEntry);
+            storageService.writeThrough(fileEntry);
         });
     }
 

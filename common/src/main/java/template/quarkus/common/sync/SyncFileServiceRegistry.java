@@ -51,4 +51,8 @@ public class SyncFileServiceRegistry {
     public Collection<SyncFileService> getAllRegistered() {
         return Collections.unmodifiableCollection(cache.values());
     }
+
+    public SyncFileService getRegistered(String nodeId){
+        return cache.get(nodeId);
+    }
 }

@@ -11,7 +11,7 @@ public interface ClientFileRESTService {
 
     @POST
     @Path("/")
-    void write(ChangeEntry changeEntry);
+    void write(FileEntry fileEntry);
 
     @GET
     @Path("/{file}")

@@ -8,31 +8,54 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import template.quarkus.common.content.ChangeEntry;
 import template.quarkus.common.content.FileEntry;
+import template.quarkus.common.content.FileVersionEntry;
+import template.quarkus.common.content.UpdatePackage;
 
 @ApplicationScoped
 public class Storage {
 
     private static final Logger log = LoggerFactory.getLogger(Storage.class);
 
-    private final SortedSet<ChangeEntry> changeEntries =
-            new TreeSet<>(Comparator.comparingInt(ChangeEntry::version).reversed());
+    private Map<String,FileVersionEntry> store = new HashMap<>();
+    private int latestVersion = 1;
 
     public Storage() {}
 
-    public void write(ChangeEntry changeEntry) {
-        log.info("Write");
-        changeEntries.add(changeEntry);
+    public int replicaUpdate(UpdatePackage message) {
+        if(message.getUntilVersion() <= latestVersion) return -2;
+        if(message.getAfterVersion() - latestVersion != 0) return latestVersion;
+        message.getFiles().forEach(fileVersionEntry -> store.put(fileVersionEntry.name(), fileVersionEntry));
+        latestVersion = message.getUntilVersion();
+        return 0;
     }
 
-    public byte[] read(String file) {
-        log.info("Read");
-        for (ChangeEntry entry : changeEntries) {
-            Optional<FileEntry> fileEntry =
-                    entry.files().stream().filter(e -> e.name().equals(file)).findFirst();
-            if (fileEntry.isPresent()) {
-                return fileEntry.get().bytes();
-            }
-        }
-        return null;
+    public boolean writeClientFile(FileEntry fileEntry){
+        latestVersion++;
+        store.put(fileEntry.name(), new FileVersionEntry(fileEntry.name(), latestVersion, fileEntry.bytes()));
+        return false;
+    }
+
+    public FileVersionEntry getFileEntry(String filename) {
+        return store.get(filename);
+    }
+
+    public int getVersion(String filename){
+        return store.get(filename).version();
+    }
+
+    public int getLatestVersion(){
+        return latestVersion;
+    }
+
+    public List<FileVersionEntry> getFilesChangedAfterVersion(int version){
+        List<FileVersionEntry> changedAfterVersion = new ArrayList<>();
+        store.forEach((key, value) -> {
+            if(value.version() > version) changedAfterVersion.add(value);
+        });
+        return changedAfterVersion;
+    }
+
+    public byte[] read(String name){
+        return store.get(name).bytes();
     }
 }
