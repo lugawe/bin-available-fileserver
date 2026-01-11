@@ -56,6 +56,9 @@ public class Storage {
     }
 
     public byte[] read(String name) {
+        if (!store.containsKey(name)) {
+            return null;
+        }
         return store.get(name).bytes();
     }
 
