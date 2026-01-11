@@ -6,6 +6,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.quarkus.scheduler.Scheduled;
 import template.quarkus.common.content.FileEntry;
 import template.quarkus.common.content.FileVersionEntry;
 import template.quarkus.common.content.UpdateEntry;
@@ -20,7 +22,7 @@ public class Storage {
 
     public Storage() {}
 
-    public int replicaUpdate(UpdateEntry message) {
+    public int writeReplicaUpdate(UpdateEntry message) {
         if (message.untilVersion() <= latestVersion) return -2;
         if (message.afterVersion() - latestVersion != 0) return latestVersion;
         message.files().forEach(fileVersionEntry -> store.put(fileVersionEntry.name(), fileVersionEntry));
@@ -56,5 +58,13 @@ public class Storage {
 
     public byte[] read(String name) {
         return store.get(name).bytes();
+    }
+
+    @Scheduled(every = "30s")
+    public void scheduledFileList(){
+        log.info("Filelist(V"+latestVersion+")");
+        store.forEach((key, value) -> {
+            log.info("File: "+key+";Version: "+value.version());
+        });
     }
 }
