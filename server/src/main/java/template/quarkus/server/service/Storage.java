@@ -19,9 +19,22 @@ public class Storage {
 
     public Storage() {}
 
+    private int getNextVersion() {
+        ChangeEntry first = changeEntries.first();
+        if (first == null) {
+            return 1;
+        }
+        return first.version() + 1;
+    }
+
     public void write(ChangeEntry changeEntry) {
         log.info("Write");
         changeEntries.add(changeEntry);
+    }
+
+    public void write(FileEntry fileEntry) {
+        ChangeEntry changeEntry = new ChangeEntry(getNextVersion(), Collections.singletonList(fileEntry));
+        write(changeEntry);
     }
 
     public byte[] read(String file) {
