@@ -15,6 +15,6 @@ public class ChaosSyncFileService implements SyncFileService {
 
     @Override
     public int sync(UpdatePackage updatePackage) {
-        return syncFileService.sync(updatePackage); // TODO: blocker
+        return blocker.blockIfDown(() -> syncFileService.sync(updatePackage));
     }
 }
