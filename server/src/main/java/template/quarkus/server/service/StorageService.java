@@ -6,7 +6,7 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import template.quarkus.common.content.FileEntry;
-import template.quarkus.common.content.UpdatePackage;
+import template.quarkus.common.content.UpdateEntry;
 import template.quarkus.common.sync.SyncFileService;
 import template.quarkus.common.sync.SyncFileServiceRegistry;
 import template.quarkus.common.util.Blocker;
@@ -27,8 +27,8 @@ public class StorageService {
 
     public StorageService() {}
 
-    public int store(UpdatePackage updatePackage) {
-        return storage.replicaUpdate(updatePackage);
+    public int store(UpdateEntry updateEntry) {
+        return storage.replicaUpdate(updateEntry);
     }
 
     public void writeThrough(FileEntry fileEntry) {
@@ -48,13 +48,13 @@ public class StorageService {
     }
 
     private void syncHelper(SyncFileService fs) {
-        UpdatePackage nodePackage = new UpdatePackage(
+        UpdateEntry nodePackage = new UpdateEntry(
                 storage.getLatestVersion(), storage.getFilesChangedAfterVersion(storage.getLatestVersion() - 1));
         int returnStatusCode;
         do {
             returnStatusCode = fs.sync(nodePackage);
             if (returnStatusCode > 0)
-                nodePackage = new UpdatePackage(
+                nodePackage = new UpdateEntry(
                         storage.getLatestVersion(),
                         returnStatusCode,
                         storage.getFilesChangedAfterVersion(returnStatusCode));

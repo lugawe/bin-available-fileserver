@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import template.quarkus.common.content.FileEntry;
 import template.quarkus.common.content.FileVersionEntry;
-import template.quarkus.common.content.UpdatePackage;
+import template.quarkus.common.content.UpdateEntry;
 
 @ApplicationScoped
 public class Storage {
@@ -20,11 +20,11 @@ public class Storage {
 
     public Storage() {}
 
-    public int replicaUpdate(UpdatePackage message) {
-        if (message.getUntilVersion() <= latestVersion) return -2;
-        if (message.getAfterVersion() - latestVersion != 0) return latestVersion;
-        message.getFiles().forEach(fileVersionEntry -> store.put(fileVersionEntry.name(), fileVersionEntry));
-        latestVersion = message.getUntilVersion();
+    public int replicaUpdate(UpdateEntry message) {
+        if (message.untilVersion() <= latestVersion) return -2;
+        if (message.afterVersion() - latestVersion != 0) return latestVersion;
+        message.files().forEach(fileVersionEntry -> store.put(fileVersionEntry.name(), fileVersionEntry));
+        latestVersion = message.untilVersion();
         return 0;
     }
 

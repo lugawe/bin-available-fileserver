@@ -1,6 +1,6 @@
 package template.quarkus.common.sync;
 
-import template.quarkus.common.content.UpdatePackage;
+import template.quarkus.common.content.UpdateEntry;
 import template.quarkus.common.util.Blocker;
 
 public class ChaosSyncFileService implements SyncFileService {
@@ -14,7 +14,7 @@ public class ChaosSyncFileService implements SyncFileService {
     }
 
     @Override
-    public int sync(UpdatePackage updatePackage) {
-        return blocker.blockIfDown(() -> syncFileService.sync(updatePackage));
+    public int sync(UpdateEntry updateEntry) {
+        return blocker.blockIfDown(() -> syncFileService.sync(updateEntry));
     }
 }
