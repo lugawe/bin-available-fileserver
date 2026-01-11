@@ -10,5 +10,7 @@ public final class Events {
     public static final String NODE_DOWN = "node-down:";
     public static final String NODE_UP = "node-up:";
 
+    public static final String ELECTION_NAME = "election";
+
     private Events() {}
 }

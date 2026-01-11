@@ -30,6 +30,11 @@ public class ScheduledPingService {
 
     public ScheduledPingService() {}
 
+    protected boolean isMain(String nodeId) {
+        // TODO
+        return false;
+    }
+
     @Scheduled(every = "3s")
     public void scheduledPinging() {
         // TODO message los
@@ -40,6 +45,9 @@ public class ScheduledPingService {
                 eventBus.publish(Events.NODE_NAME, Events.NODE_UP + k);
             } catch (Exception e) {
                 eventBus.publish(Events.NODE_NAME, Events.NODE_DOWN + k);
+                if (isMain(k)) {
+                    eventBus.publish(Events.ELECTION_NAME, k);
+                }
             }
         });
     }
