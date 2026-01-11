@@ -7,6 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import template.quarkus.common.content.ChangeEntry;
 
 @ApplicationScoped
 public class FileStorage {
@@ -17,9 +18,8 @@ public class FileStorage {
 
     public FileStorage() {}
 
-    public void write(Map<String, byte[]> files) {
-        store.putAll(files);
-        log.info("Stored multiple files: {}", files.size());
+    public void write(ChangeEntry changeEntry) {
+        changeEntry.files().forEach(e -> write(e.name(), e.bytes()));
     }
 
     public void write(String file, byte[] content) {

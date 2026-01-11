@@ -2,7 +2,7 @@ package template.quarkus.server.resource;
 
 import jakarta.inject.Inject;
 
-import template.quarkus.common.UpdatePackage;
+import template.quarkus.common.content.ChangeEntry;
 import template.quarkus.common.sync.SyncFileRESTService;
 import template.quarkus.common.util.Blocker;
 import template.quarkus.server.service.FileService;
@@ -18,10 +18,10 @@ public class SyncFileServiceResource implements SyncFileRESTService {
     public SyncFileServiceResource() {}
 
     @Override
-    public void sync(UpdatePackage updatePackage) {
+    public void sync(ChangeEntry changeEntry) {
         blocker.blockIfDown(() -> {
             //
-            fileService.store(updatePackage);
+            fileService.store(changeEntry);
         });
     }
 }

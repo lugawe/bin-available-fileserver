@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import template.quarkus.common.UpdatePackage;
+import template.quarkus.common.content.ChangeEntry;
 import template.quarkus.common.sync.SyncFileServiceRegistry;
 import template.quarkus.common.util.Blocker;
 
@@ -25,15 +25,15 @@ public class FileService {
 
     public FileService() {}
 
-    public void store(UpdatePackage updatePackage) {
-        fileStorage.write(updatePackage.getFiles());
+    public void store(ChangeEntry changeEntry) {
+        fileStorage.write(changeEntry);
     }
 
-    public void writeThrough(UpdatePackage updatePackage) {
-        fileStorage.write(updatePackage.getFiles());
+    public void writeThrough(ChangeEntry changeEntry) {
+        fileStorage.write(changeEntry);
 
         syncFileServiceRegistry.getAllRegistered().parallelStream()
-                .forEach(fs -> blocker.maybeSendMessage(() -> fs.sync(updatePackage)));
+                .forEach(fs -> blocker.maybeSendMessage(() -> fs.sync(changeEntry)));
     }
 
     public byte[] read(String file) {
