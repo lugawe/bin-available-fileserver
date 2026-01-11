@@ -10,33 +10,33 @@ import template.quarkus.common.sync.SyncFileServiceRegistry;
 import template.quarkus.common.util.Blocker;
 
 @ApplicationScoped
-public class FileService {
+public class StorageService {
 
-    private static final Logger log = LoggerFactory.getLogger(FileService.class);
+    private static final Logger log = LoggerFactory.getLogger(StorageService.class);
 
     @Inject
     private Blocker blocker;
 
     @Inject
-    private FileStorage fileStorage;
+    private Storage storage;
 
     @Inject
     private SyncFileServiceRegistry syncFileServiceRegistry;
 
-    public FileService() {}
+    public StorageService() {}
 
     public void store(ChangeEntry changeEntry) {
-        fileStorage.write(changeEntry);
+        storage.write(changeEntry);
     }
 
     public void writeThrough(ChangeEntry changeEntry) {
-        fileStorage.write(changeEntry);
+        storage.write(changeEntry);
 
         syncFileServiceRegistry.getAllRegistered().parallelStream()
                 .forEach(fs -> blocker.maybeSendMessage(() -> fs.sync(changeEntry)));
     }
 
     public byte[] read(String file) {
-        return fileStorage.read(file);
+        return storage.read(file);
     }
 }

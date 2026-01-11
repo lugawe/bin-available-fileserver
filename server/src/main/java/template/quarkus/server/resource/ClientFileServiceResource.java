@@ -6,7 +6,7 @@ import template.quarkus.common.ClientFileRESTService;
 import template.quarkus.common.content.ChangeEntry;
 import template.quarkus.common.content.FileEntry;
 import template.quarkus.common.util.Blocker;
-import template.quarkus.server.service.FileService;
+import template.quarkus.server.service.StorageService;
 
 public class ClientFileServiceResource implements ClientFileRESTService {
 
@@ -14,7 +14,7 @@ public class ClientFileServiceResource implements ClientFileRESTService {
     private Blocker blocker;
 
     @Inject
-    private FileService fileService;
+    private StorageService storageService;
 
     public ClientFileServiceResource() {}
 
@@ -22,7 +22,7 @@ public class ClientFileServiceResource implements ClientFileRESTService {
     public void write(ChangeEntry changeEntry) {
         blocker.blockIfDown(() -> {
             //
-            fileService.writeThrough(changeEntry);
+            storageService.writeThrough(changeEntry);
         });
     }
 
@@ -30,7 +30,7 @@ public class ClientFileServiceResource implements ClientFileRESTService {
     public FileEntry read(String file) {
         return blocker.blockIfDown(() -> {
             //
-            return new FileEntry(file, fileService.read(file));
+            return new FileEntry(file, storageService.read(file));
         });
     }
 }

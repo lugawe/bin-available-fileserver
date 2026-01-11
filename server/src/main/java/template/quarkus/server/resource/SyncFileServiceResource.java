@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 import template.quarkus.common.content.ChangeEntry;
 import template.quarkus.common.sync.SyncFileRESTService;
 import template.quarkus.common.util.Blocker;
-import template.quarkus.server.service.FileService;
+import template.quarkus.server.service.StorageService;
 
 public class SyncFileServiceResource implements SyncFileRESTService {
 
@@ -13,7 +13,7 @@ public class SyncFileServiceResource implements SyncFileRESTService {
     private Blocker blocker;
 
     @Inject
-    private FileService fileService;
+    private StorageService storageService;
 
     public SyncFileServiceResource() {}
 
@@ -21,7 +21,7 @@ public class SyncFileServiceResource implements SyncFileRESTService {
     public void sync(ChangeEntry changeEntry) {
         blocker.blockIfDown(() -> {
             //
-            fileService.store(changeEntry);
+            storageService.store(changeEntry);
         });
     }
 }
