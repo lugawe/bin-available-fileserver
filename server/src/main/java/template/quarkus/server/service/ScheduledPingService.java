@@ -42,9 +42,9 @@ public class ScheduledPingService {
         pingServiceRegistry.getAllRegisteredMap().forEach((k, v) -> {
             try {
                 v.ping(pingPackage);
-                eventBus.publish(Events.NODE_NAME, Events.NODE_UP + k);
+                eventBus.publish(Events.NODE_UP, k);
             } catch (Exception e) {
-                eventBus.publish(Events.NODE_NAME, Events.NODE_DOWN + k);
+                eventBus.publish(Events.NODE_DOWN, k);
                 if (isMain(k)) {
                     eventBus.publish(Events.ELECTION_NAME, k);
                 }

@@ -52,12 +52,12 @@ public class ScheduledChaosService {
             Runtime.getRuntime().halt(1); // Instant shutdown
         } else {
             log.error("Node {} is down", nodeId);
-            eventBus.publish(Events.ALIVE_NAME, Events.ALIVE_DOWN);
+            eventBus.publish(Events.ALIVE_DOWN, null);
         }
     }
 
     public void setEnabled() {
         log.info("Node {} is back", nodeId);
-        eventBus.publish(Events.ALIVE_NAME, Events.ALIVE_UP);
+        eventBus.publish(Events.ALIVE_UP, null);
     }
 }

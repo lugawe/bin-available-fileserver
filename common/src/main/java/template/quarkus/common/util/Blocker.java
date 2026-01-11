@@ -21,15 +21,18 @@ public class Blocker {
 
     public Blocker() {}
 
-    @ConsumeEvent(Events.ALIVE_NAME)
-    public void consume(String value) {
+    @ConsumeEvent(Events.ALIVE_DOWN)
+    public void consumeAliveDown(String s) {
         synchronized (lock) {
-            if (Events.ALIVE_DOWN.equals(value)) {
-                enabled = false;
-            } else if (Events.ALIVE_UP.equals(value)) {
-                enabled = true;
-                lock.notifyAll();
-            }
+            enabled = false;
+        }
+    }
+
+    @ConsumeEvent(Events.ALIVE_UP)
+    public void consumeAliveUp(String s) {
+        synchronized (lock) {
+            enabled = true;
+            lock.notifyAll();
         }
     }
 
