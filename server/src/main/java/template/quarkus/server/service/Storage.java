@@ -20,10 +20,10 @@ public class Storage {
     public Storage() {}
 
     private int getNextVersion() {
-        ChangeEntry first = changeEntries.first();
-        if (first == null) {
+        if (changeEntries.isEmpty()) {
             return 1;
         }
+        ChangeEntry first = changeEntries.first();
         return first.version() + 1;
     }
 
