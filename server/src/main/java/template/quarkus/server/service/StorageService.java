@@ -41,7 +41,7 @@ public class StorageService {
     }
     
     @ConsumeEvent(Events.NODE_UP)
-    private void writeSync(String node) {
+    public void writeSync(String node) {
         syncHelper(syncFileServiceRegistry.getRegistered(node));
     }
 
