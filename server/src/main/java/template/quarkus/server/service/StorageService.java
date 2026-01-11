@@ -40,9 +40,10 @@ public class StorageService {
         writeSync();
     }
     
-    @ConsumeEvent(Events.NODE_UP)
-    public void writeSync(String node) {
-        syncHelper(syncFileServiceRegistry.getRegistered(node));
+    @ConsumeEvent(value = Events.NODE_UP, blocking = true) 
+    public void writeSync(String node) { 
+        log.info("Resync of node {}", node);
+        new Thread(() -> syncHelper(syncFileServiceRegistry.getRegistered(node))).run(); 
     }
 
     private void writeSync() {
@@ -56,12 +57,16 @@ public class StorageService {
                 storage.getLatestVersion(), storage.getFilesChangedAfterVersion(storage.getLatestVersion() - 1));
         int returnStatusCode;
         do {
+            log.info("Sending sync for version range ]{},{}]", nodePackage.afterVersion(),nodePackage.untilVersion());
             returnStatusCode = fs.sync(nodePackage);
-            if (returnStatusCode > 0)
+            if (returnStatusCode > 0){
                 nodePackage = new UpdateEntry(
                         storage.getLatestVersion(),
                         returnStatusCode,
                         storage.getFilesChangedAfterVersion(returnStatusCode));
+                        log.info("Request to send sync for version range ]{},{}]",nodePackage.afterVersion(),nodePackage.untilVersion());
+            }
+
         } while (returnStatusCode != 0);
     }
 

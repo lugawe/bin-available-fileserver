@@ -18,7 +18,7 @@ public class RESTClient {
 
     public ClientFileRESTService fileService(String nodeId) {
         return RestClientBuilder.newBuilder()
-                .baseUri(URI.create("http://" + nodeId + ":8080/api"))
+                .baseUri(URI.create("http://" + nodeId + ":8081/api"))
                 .build(ClientFileRESTService.class);
     }
 
