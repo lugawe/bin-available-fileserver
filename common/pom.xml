@@ -30,7 +30,6 @@
             <artifactId>quarkus-rest-client-jackson</artifactId>
         </dependency>
 
-
         <!-- testing dependencies -->
 
         <dependency>

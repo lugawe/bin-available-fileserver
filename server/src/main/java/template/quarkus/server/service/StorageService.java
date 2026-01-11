@@ -28,7 +28,7 @@ public class StorageService {
     public StorageService() {}
 
     public int store(UpdateEntry updateEntry) {
-        return storage.replicaUpdate(updateEntry);
+        return storage.writeReplicaUpdate(updateEntry);
     }
 
     public void writeThrough(FileEntry fileEntry) {
