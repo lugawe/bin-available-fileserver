@@ -30,7 +30,7 @@ public class Storage {
 
     public boolean writeClientFile(FileEntry fileEntry) {
         latestVersion++;
-        store.put(fileEntry.name(), new FileVersionEntry(fileEntry.name(), latestVersion, fileEntry.bytes()));
+        store.put(fileEntry.name(), new FileVersionEntry(fileEntry.name(), fileEntry.bytes(), latestVersion));
         return false;
     }
 
