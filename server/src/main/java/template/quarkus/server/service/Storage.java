@@ -4,10 +4,9 @@ import java.util.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
+import io.quarkus.scheduler.Scheduled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.quarkus.scheduler.Scheduled;
 import template.quarkus.common.content.FileEntry;
 import template.quarkus.common.content.FileVersionEntry;
 import template.quarkus.common.content.UpdateEntry;
@@ -61,10 +60,10 @@ public class Storage {
     }
 
     @Scheduled(every = "30s")
-    public void scheduledFileList(){
-        log.info("Filelist(V"+latestVersion+")");
+    public void printFileList() {
+        log.info("File-List (V{})", latestVersion);
         store.forEach((key, value) -> {
-            log.info("File: "+key+";Version: "+value.version());
+            log.info("File: {}; Version: {}", key, value.version());
         });
     }
 }
