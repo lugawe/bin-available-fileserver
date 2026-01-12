@@ -3,7 +3,7 @@ package template.quarkus.server.service;
 import java.util.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
-
+import jakarta.inject.Inject;
 import io.quarkus.scheduler.Scheduled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +19,9 @@ public class Storage {
     private final Map<String, FileVersionEntry> store = new HashMap<>();
     private int latestVersion = 1;
 
+    @Inject
+    ElectionService electionService;
+
     public Storage() {}
 
     public int writeReplicaUpdate(UpdateEntry message) {
@@ -27,12 +30,12 @@ public class Storage {
             return -2;
         }
         if (message.afterVersion() - latestVersion != 0) {
-            log.info("localstorage benötigt Files ab Version {} nicht {}", latestVersion, message.afterVersion());
+            log.info("{}: localstorage benötigt Files ab Version {} nicht {}", electionService.myRole(), latestVersion, message.afterVersion());
             return latestVersion;
         }
         message.files().forEach(fileVersionEntry -> store.put(fileVersionEntry.name(), fileVersionEntry));
         latestVersion = message.untilVersion();
-        log.info("Files in der versionsrange ]{},{}] wurden gespeichert", message.afterVersion(), message.untilVersion());
+        log.info("{}: Files in der versionsrange ]{},{}] wurden gespeichert", electionService.myRole(), message.afterVersion(), message.untilVersion());
         printFileList();
         return 0;
     }
@@ -71,9 +74,9 @@ public class Storage {
 
     @Scheduled(every = "30s")
     public void printFileList() {
-        log.info("File-List (V{})", latestVersion);
+        log.info("{}: File-List (V{})", electionService.myRole(), latestVersion);
         store.forEach((key, value) -> {
-            log.info("File: {}; Version: {}", key, value.version());
+            log.info("File: {}; Version: {}", electionService.myRole(), key, value.version());
         });
     }
 }

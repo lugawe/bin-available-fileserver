@@ -40,11 +40,16 @@ public class ElectionService {
         return localNodeId.equals(mainNodeId);
     }
 
+    public String myRole(){
+        if(isMain())return "[Main]";
+        else return "[Replika]";
+    }
+
     @ConsumeEvent(value = Events.NODE_DOWN, blocking = true)
     public void onNodeDown(String nodeId) {
         new Thread(() -> {
             if (mainNodeId.equals(nodeId)) {
-            log.info("The current main node is not reachable");
+            log.info("{}: The current main node is not reachable", myRole());
             electionServiceRegistry.getAllAliveRegistered(nodeStateService.getActiveNodes().stream()
             .filter(s -> !s.contains(mainNodeId))
             .filter(s -> !s.contains(localNodeId))
@@ -52,12 +57,12 @@ public class ElectionService {
             .forEach(es -> {
                 Response response = es.requestToBecomeMain(new Request(localNodeId, storageService.getLatestVersion()));
                 if(response.ok()){
-                    log.info("getMain erfolgreich");
                     mainNodeId = localNodeId;
+                    log.info("{}: getMain erfolgreich", myRole());
                     storageService.writeSync();
                 }else{
                     mainNodeId = response.NodeId();
-                    log.info("getMain erfolgreich nicht erfolgreich: {} ist jezt main", mainNodeId);
+                    log.info("{}: getMain erfolgreich nicht erfolgreich: {} ist jezt main", myRole(), mainNodeId);
                 }
             });;
         }

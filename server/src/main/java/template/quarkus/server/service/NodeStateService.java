@@ -5,17 +5,22 @@ import java.util.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
+import io.quarkus.logging.Log;
 import io.quarkus.scheduler.Scheduled;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.impl.ConcurrentHashSet;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import template.quarkus.common.Events;
 import template.quarkus.common.ping.PingService;
 import template.quarkus.common.ping.PingServiceRegistry;
 
 @ApplicationScoped
 public class NodeStateService {
+
+    private static final Logger log = LoggerFactory.getLogger(NodeStateService.class);
 
     private final Set<String> activeNodes = new ConcurrentHashSet<>();
 
@@ -45,14 +50,16 @@ public class NodeStateService {
         pingServiceRegistry.getAllRegisteredMap().entrySet().parallelStream().forEach((entry) -> {
             String nodeId = entry.getKey();
             PingService pingService = entry.getValue();
-
+            //log.info("ping {}", nodeId);
             try {
                 pingService.ping(pingPackage);
                 if (activeNodes.add(nodeId)) {
+                    log.info("Node {} up again", nodeId);
                     eventBus.publish(Events.NODE_UP, nodeId);
                 }
             } catch (Exception e) {
                 if (activeNodes.remove(nodeId)) {
+                    log.info("Node {} down", nodeId);
                     eventBus.publish(Events.NODE_DOWN, nodeId);
                 }
             }

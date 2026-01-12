@@ -38,7 +38,7 @@ public class ScheduledChaosService {
     public void maybeDisable() {
         double v = ThreadLocalRandom.current().nextDouble();
         inContext(() -> {
-            if (v < 0.2) {
+            if (v < 0.5) {
                 boolean die = v < 0.15;
                 if(!enabled)return;
                 setDisabled(die);
@@ -50,6 +50,7 @@ public class ScheduledChaosService {
     }
 
     public void setDisabled(boolean die) {
+        enabled = false;
         if (die) {
             log.error("I am DEAD! Shutting down...");
             Runtime.getRuntime().halt(1); // Instant shutdown
@@ -60,6 +61,7 @@ public class ScheduledChaosService {
     }
 
     public void setEnabled() {
+        enabled = true;
         log.info("I am back");
         eventBus.publish(Events.ALIVE_UP, null);
     }
