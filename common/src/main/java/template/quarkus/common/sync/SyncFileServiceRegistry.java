@@ -32,7 +32,7 @@ public class SyncFileServiceRegistry {
 
     private ChaosSyncFileService createFileService(String nodeId) {
         SyncFileRESTService syncFileService = RestClientBuilder.newBuilder()
-                .baseUri(URI.create("http://" + nodeId + ":8080/api"))
+                .baseUri(URI.create("http://" + nodeId + "/api"))
                 .build(SyncFileRESTService.class);
         return new ChaosSyncFileService(blocker, syncFileService);
     }

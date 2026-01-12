@@ -8,6 +8,7 @@ import io.quarkus.vertx.ConsumeEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -33,6 +34,9 @@ public class ElectionService {
     @ConfigProperty(name = "node.id")
     private String localNodeId;
 
+    @ConfigProperty(name = "node.replicas")
+    private List<String> replicas;
+    
     @ConfigProperty(name = "node.main")
     private String mainNodeId;
 
@@ -153,12 +157,12 @@ public class ElectionService {
     }
 
     private String woMainWhenEqualVersion(String otherNodeId){
-        if(localNodeId.equals("node-1")){
-            return "node-1";
-        }else if(localNodeId.equals("node-2")){
-            if(otherNodeId.equals("node-1"))return "node-1";
-            else return "node-2";
-        }else if(localNodeId.equals("node-3")){
+        if(localNodeId.equals(replicas.get(1))){//node 1
+            return replicas.get(1);
+        }else if(localNodeId.equals(replicas.get(2))){//node 2
+            if(otherNodeId.equals(replicas.get(1)))return replicas.get(1);
+            else return replicas.get(1);
+        }else if(localNodeId.equals(replicas.get(3))){//node3
             return otherNodeId;
         }
         return localNodeId;
