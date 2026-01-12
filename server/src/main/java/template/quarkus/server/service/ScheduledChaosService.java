@@ -39,7 +39,7 @@ public class ScheduledChaosService {
         double v = ThreadLocalRandom.current().nextDouble();
         inContext(() -> {
             if (v < 0.5) {
-                boolean die = v < 0.15;
+                boolean die = true;
                 if(!enabled)return;
                 setDisabled(die);
             } else {

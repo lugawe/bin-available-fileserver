@@ -37,6 +37,7 @@ public class StorageService {
     public StorageService() {}
 
     public int store(UpdateEntry updateEntry) {
+        electionService.setMain(updateEntry.nodeId());
         return storage.writeReplicaUpdate(updateEntry);
     }
 
@@ -71,7 +72,7 @@ public class StorageService {
             return;
         }
         UpdateEntry nodePackage = new UpdateEntry(
-                storage.getLatestVersion(), storage.getFilesChangedAfterVersion(storage.getLatestVersion() - 1));
+                storage.getLatestVersion(), storage.getFilesChangedAfterVersion(storage.getLatestVersion() - 1), electionService.getLocalNodeId());
         int returnStatusCode;
         do {
             log.info("{}: Sending sync for version range ]{},{}]", electionService.myRole(), nodePackage.afterVersion(),nodePackage.untilVersion());
@@ -80,7 +81,8 @@ public class StorageService {
                 nodePackage = new UpdateEntry(
                         storage.getLatestVersion(),
                         returnStatusCode,
-                        storage.getFilesChangedAfterVersion(returnStatusCode));
+                        storage.getFilesChangedAfterVersion(returnStatusCode),
+                        electionService.getLocalNodeId());
                         log.info("{}: got request to send sync for version range ]{},{}]", electionService.myRole(), nodePackage.afterVersion(),nodePackage.untilVersion());
             }
 

@@ -4,7 +4,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import io.quarkus.vertx.ConsumeEvent;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
+
+import javax.print.DocFlavor.STRING;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
@@ -62,7 +65,7 @@ public class ElectionService {
                     storageService.writeSync();
                 }else{
                     mainNodeId = response.NodeId();
-                    log.info("{}: getMain erfolgreich nicht erfolgreich: {} ist jezt main", myRole(), mainNodeId);
+                    log.info("{}: getMain nicht erfolgreich: {} ist jezt main", myRole(), mainNodeId);
                 }
             });;
         }
@@ -70,13 +73,46 @@ public class ElectionService {
     }
 
     public Response respondToElection(Request request){
-        if(request.maxVersion() >= storageService.getLatestVersion()){
+        log.info("{}: got election Request from Node {}", myRole(), request.nodeId());
+        if(request.maxVersion() > storageService.getLatestVersion()){
             mainNodeId = request.nodeId();
+            log.info("{}: Accepted {} as new main", myRole(), request.nodeId());
             return new Response(localNodeId, true);
+        }else if(request.maxVersion() == storageService.getLatestVersion()){
+            mainNodeId = woMainWhenEqualVersion(request.nodeId());
+            if(isMain()){
+                storageService.writeSync();
+                log.info("{}: I am new main", myRole());
+                return new Response(localNodeId, false);
+            }else{
+                log.info("{}: Accepted {} as new main", myRole(), request.nodeId());
+                return new Response(localNodeId, true);
+            }
         }else{
             mainNodeId = localNodeId;
+            log.info("{}: I am new main", myRole());
             storageService.writeSync();
             return new Response(localNodeId, false);
         }
+    }
+
+    private String woMainWhenEqualVersion(String otherNodeId){
+        if(localNodeId.equals("node-1")){
+            return "node-1";
+        }else if(localNodeId.equals("node-2")){
+            if(otherNodeId.equals("node-1"))return "node-1";
+            else return "node-2";
+        }else if(localNodeId.equals("node-3")){
+            return otherNodeId;
+        }
+        return localNodeId;
+    }
+
+    public String getLocalNodeId(){
+        return localNodeId;
+    }
+
+    public void setMain(String nodeId){
+        mainNodeId = nodeId;
     }
 }
