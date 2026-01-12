@@ -25,8 +25,4 @@ public class RESTClient {
     public ClientFileRESTService fileService() {
         return fileService(endpoint);
     }
-
-    public void setEndpoint(String nodeId){
-        endpoint = nodeId;
-    }
 }
