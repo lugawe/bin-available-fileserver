@@ -15,8 +15,8 @@ public class PingServiceResource implements PingRESTService {
     @Override
     public PingPackage ping(PingPackage ping) {
         return blocker.blockIfDown(() -> {
-            //
-            return new PingPackage("pong");
+            if(blocker.hasBeenDown())return new PingPackage("wasdown");
+            else return new PingPackage("pong");
         });
     }
 }

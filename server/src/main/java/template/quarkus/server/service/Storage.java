@@ -29,6 +29,7 @@ public class Storage {
             log.error("Jüngere version: schwerer Fehler");
             return -2;
         }
+        if (message.untilVersion() - latestVersion == 0) return 0;
         if (message.afterVersion() - latestVersion != 0) {
             log.info("{}: localstorage benötigt Files ab Version {} nicht {}", electionService.myRole(), latestVersion, message.afterVersion());
             return latestVersion;
@@ -74,9 +75,9 @@ public class Storage {
 
     @Scheduled(every = "30s")
     public void printFileList() {
-        log.info("{}: File-List (V{})", electionService.myRole(), latestVersion);
+        log.info("{}: File-List (V{}) Current main:{}", electionService.myRole(), latestVersion, electionService.getMainNodeId());
         store.forEach((key, value) -> {
-            log.info("File: {}; Version: {}", electionService.myRole(), key, value.version());
+            log.info("{}: File: {}; Version: {}", electionService.myRole(), key, value.version());
         });
     }
 }

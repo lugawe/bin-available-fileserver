@@ -33,6 +33,8 @@ public class NodeStateService {
     @Inject
     private PingServiceRegistry pingServiceRegistry;
 
+    private boolean mainIsDead = false;
+
     public NodeStateService() {}
 
     @PostConstruct
@@ -52,14 +54,15 @@ public class NodeStateService {
             PingService pingService = entry.getValue();
             //log.info("ping {}", nodeId);
             try {
-                pingService.ping(pingPackage);
-                if (activeNodes.add(nodeId)) {
+                String pingMessage = pingService.ping(pingPackage).ping();
+                if (activeNodes.add(nodeId) || pingMessage.equals("wasdown")) {
                     log.info("Node {} up again", nodeId);
                     eventBus.publish(Events.NODE_UP, nodeId);
                 }
             } catch (Exception e) {
                 if (activeNodes.remove(nodeId)) {
                     log.info("Node {} down", nodeId);
+                    mainIsDead = true;
                     eventBus.publish(Events.NODE_DOWN, nodeId);
                 }
             }
@@ -68,5 +71,13 @@ public class NodeStateService {
 
     public Set<String> getActiveNodes() {
         return Collections.unmodifiableSet(activeNodes);
+    }
+
+    public boolean getMainIsDead(){
+        return mainIsDead;
+    }
+
+    public void setMainIsDead(boolean mainIsDead){
+        this.mainIsDead = mainIsDead;
     }
 }

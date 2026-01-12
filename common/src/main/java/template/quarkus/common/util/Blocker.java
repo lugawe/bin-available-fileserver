@@ -1,6 +1,7 @@
 package template.quarkus.common.util;
 
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -9,6 +10,8 @@ import io.quarkus.vertx.ConsumeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import template.quarkus.common.Events;
+import io.quarkus.scheduler.Scheduled;
+
 
 @ApplicationScoped
 public class Blocker {
@@ -19,12 +22,15 @@ public class Blocker {
 
     private boolean enabled = true;
 
+    private boolean hasBeenDown = false;
+
     public Blocker() {}
 
     @ConsumeEvent(Events.ALIVE_DOWN)
     public void consumeAliveDown(String s) {
         synchronized (lock) {
             enabled = false;
+            hasBeenDown = true;
         }
     }
 
@@ -69,5 +75,14 @@ public class Blocker {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public boolean hasBeenDown(){
+        return hasBeenDown;
+    }
+
+    @Scheduled(every = "10s", delay = 10, delayUnit = TimeUnit.SECONDS)
+    public void unsetHasBeenDown(){
+        hasBeenDown = false;
     }
 }

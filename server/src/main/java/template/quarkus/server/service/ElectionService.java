@@ -1,10 +1,15 @@
 package template.quarkus.server.service;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import io.quarkus.scheduler.Scheduled;
 import io.quarkus.vertx.ConsumeEvent;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.print.DocFlavor.STRING;
@@ -52,28 +57,63 @@ public class ElectionService {
     public void onNodeDown(String nodeId) {
         new Thread(() -> {
             if (mainNodeId.equals(nodeId)) {
-            log.info("{}: The current main node is not reachable", myRole());
-            electionServiceRegistry.getAllAliveRegistered(nodeStateService.getActiveNodes().stream()
-            .filter(s -> !s.contains(mainNodeId))
-            .filter(s -> !s.contains(localNodeId))
-            .collect(Collectors.toSet()))
-            .forEach(es -> {
-                Response response = es.requestToBecomeMain(new Request(localNodeId, storageService.getLatestVersion()));
-                if(response.ok()){
-                    mainNodeId = localNodeId;
-                    log.info("{}: getMain erfolgreich", myRole());
-                    storageService.writeSync();
-                }else{
-                    mainNodeId = response.NodeId();
-                    log.info("{}: getMain nicht erfolgreich: {} ist jezt main", myRole(), mainNodeId);
-                }
-            });;
+            while(!makeElectionRequest())log.info("election failed. retrying");
         }
         }).run(); 
+    }
+    @Scheduled(every = "300s", delay = 2, delayUnit = TimeUnit.SECONDS)
+    public void updateMain(){
+        while(!makeElectionRequest())log.info("election failed. retrying");
+    }
+    private boolean makeElectionRequest(){
+        log.info("{}: The current main node is not reachable or set", myRole());
+        Set<String> aliveSet = nodeStateService.getActiveNodes().stream().filter(s -> !s.contains(localNodeId)).filter(s -> !s.contains(mainNodeId)).collect(Collectors.toSet());
+        if(aliveSet.isEmpty()){
+            mainNodeId = localNodeId;
+            log.info("{}: I am main bc everyone is dead", myRole());
+            storageService.writeSync();
+            return true;
+        }
+        for(String aliveNode : aliveSet){
+            log.info("sending election request to node {}", aliveNode);
+            Response response = null;
+            template.quarkus.common.election.ElectionService es = electionServiceRegistry.getRegistered(aliveNode);
+            do {
+                aliveSet = nodeStateService.getActiveNodes().stream().filter(s -> !s.contains(localNodeId)).filter(s -> !s.contains(mainNodeId)).collect(Collectors.toSet());
+                try {
+                    response = es.requestToBecomeMain(new Request(localNodeId, storageService.getLatestVersion()));
+                } catch (Exception e) {
+                    log.error("{}: Node {} antwortet nicht auf election call. retrying", myRole(),aliveNode);
+                    response = null;
+                }
+                if(!aliveSet.contains(aliveNode))break;
+            } while (response == null);
+            if(response == null){
+                log.error("mein electionpartner {} ist down", aliveNode);
+                return false;
+            }else if(response.NodeId().equals(localNodeId)){
+                mainNodeId = localNodeId;
+                log.info("{}: mein election sagt ich bin main", myRole());
+                storageService.writeSync();
+            }else{
+                mainNodeId = response.NodeId();
+                log.info("{}: Die node {} ist statt mir main", myRole(), mainNodeId);
+            }
+        }
+        nodeStateService.setMainIsDead(false);
+        return true;
     }
 
     public Response respondToElection(Request request){
         log.info("{}: got election Request from Node {}", myRole(), request.nodeId());
+        if(isMain()){
+            log.info("Ich bim main und gebe mich zurück");
+            return new Response(localNodeId, false);
+        }
+        if(nodeStateService.getActiveNodes().contains(mainNodeId) && !nodeStateService.getMainIsDead()) {
+            log.info("main existiert noch");
+            return new Response(mainNodeId, false);
+        }
         if(request.maxVersion() > storageService.getLatestVersion()){
             mainNodeId = request.nodeId();
             log.info("{}: Accepted {} as new main", myRole(), request.nodeId());
@@ -82,15 +122,15 @@ public class ElectionService {
             mainNodeId = woMainWhenEqualVersion(request.nodeId());
             if(isMain()){
                 storageService.writeSync();
-                log.info("{}: I am new main", myRole());
+                log.info("{}: I am new main bc of Rules", myRole());
                 return new Response(localNodeId, false);
             }else{
-                log.info("{}: Accepted {} as new main", myRole(), request.nodeId());
-                return new Response(localNodeId, true);
+                log.info("{}: Accepted {} as new main bc of Rules", myRole(), mainNodeId);
+                return new Response(mainNodeId, true);
             }
         }else{
             mainNodeId = localNodeId;
-            log.info("{}: I am new main", myRole());
+            log.info("{}: I am new main bc I have the latest version", myRole());
             storageService.writeSync();
             return new Response(localNodeId, false);
         }
@@ -110,6 +150,10 @@ public class ElectionService {
 
     public String getLocalNodeId(){
         return localNodeId;
+    }
+
+    public String getMainNodeId(){
+        return mainNodeId;
     }
 
     public void setMain(String nodeId){

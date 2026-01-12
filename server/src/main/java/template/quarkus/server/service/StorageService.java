@@ -3,6 +3,8 @@ package template.quarkus.server.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.util.ArrayList;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,9 +44,13 @@ public class StorageService {
     }
 
     public void writeThrough(FileEntry fileEntry) {
-        storage.writeClientFile(fileEntry);
-        log.info("{}: File {} written to storage",electionService.myRole(), fileEntry.name());
-        writeSync();
+        if(electionService.isMain()){
+            storage.writeClientFile(fileEntry);
+            log.info("{}: File {} written to storage",electionService.myRole(), fileEntry.name());
+            writeSync();
+        }else{
+            log.error("got request from client, but am not main");
+        }
     }
     
     @ConsumeEvent(value = Events.NODE_UP, blocking = true) 
@@ -67,12 +73,14 @@ public class StorageService {
     }
 
     private void syncHelper(SyncFileService fs) {
+        UpdateEntry nodePackage;
         if(storage.getLatestVersion()==1){
-            log.error("{}: I have no data", electionService.myRole());
-            return;
-        }
-        UpdateEntry nodePackage = new UpdateEntry(
+            nodePackage = new UpdateEntry(1, 1, new ArrayList<>(), electionService.getLocalNodeId());
+        }else{
+            nodePackage = new UpdateEntry(
                 storage.getLatestVersion(), storage.getFilesChangedAfterVersion(storage.getLatestVersion() - 1), electionService.getLocalNodeId());
+        }
+         
         int returnStatusCode;
         do {
             log.info("{}: Sending sync for version range ]{},{}]", electionService.myRole(), nodePackage.afterVersion(),nodePackage.untilVersion());

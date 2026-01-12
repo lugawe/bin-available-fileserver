@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import template.quarkus.common.Events;
+import template.quarkus.common.util.Blocker;
 
 @ApplicationScoped
 public class ScheduledChaosService {
@@ -22,10 +23,11 @@ public class ScheduledChaosService {
     @Inject
     private EventBus eventBus;
 
+    @Inject Blocker blocker;
+
     @ConfigProperty(name = "node.id")
     private String nodeId;
 
-    private boolean enabled = true;
     public ScheduledChaosService() {}
 
     private void inContext(Runnable r) {
@@ -38,19 +40,18 @@ public class ScheduledChaosService {
     public void maybeDisable() {
         double v = ThreadLocalRandom.current().nextDouble();
         inContext(() -> {
-            if (v < 0.5) {
+            if (v < 0.4) {
                 boolean die = true;
-                if(!enabled)return;
+                if(!blocker.isEnabled())return;
                 setDisabled(die);
             } else {
-                if(enabled)return;
+                if(blocker.isEnabled())return;
                 setEnabled();
             }
         });
     }
 
     public void setDisabled(boolean die) {
-        enabled = false;
         if (die) {
             log.error("I am DEAD! Shutting down...");
             Runtime.getRuntime().halt(1); // Instant shutdown
@@ -61,7 +62,6 @@ public class ScheduledChaosService {
     }
 
     public void setEnabled() {
-        enabled = true;
         log.info("I am back");
         eventBus.publish(Events.ALIVE_UP, null);
     }
