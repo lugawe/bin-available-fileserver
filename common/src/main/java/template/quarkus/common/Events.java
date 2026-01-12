@@ -10,5 +10,7 @@ public final class Events {
 
     public static final String ELECTION_NAME = "election";
 
+    public static final String NEW_ENDPOINT = "new-endpoint";
+
     private Events() {}
 }
