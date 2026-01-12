@@ -55,7 +55,7 @@ public class CLI implements QuarkusApplication {
                     if (bytes != null) {
                         log.info("File {}: {}", fileEntry.name(), new String(bytes, StandardCharsets.UTF_8));
                     } else {
-                        log.info("File {}: {}", fileEntry.name(), "Leer");
+                        log.info("Empty File {}", fileEntry.name());
                     }
                 }
             }
