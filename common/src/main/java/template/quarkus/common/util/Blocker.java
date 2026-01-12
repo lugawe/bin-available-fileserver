@@ -22,7 +22,7 @@ public class Blocker {
 
     private boolean enabled = true;
 
-    private boolean hasBeenDown = false;
+    private boolean hasBeenDown = true;
 
     public Blocker() {}
 
@@ -81,7 +81,7 @@ public class Blocker {
         return hasBeenDown;
     }
 
-    @Scheduled(every = "10s", delay = 10, delayUnit = TimeUnit.SECONDS)
+    @Scheduled(every = "10s", delay = 5, delayUnit = TimeUnit.SECONDS)
     public void unsetHasBeenDown(){
         hasBeenDown = false;
     }

@@ -42,7 +42,7 @@ public class NodeStateService {
         activeNodes.addAll(replicas);
     }
 
-    @Scheduled(every = "3s")
+    @Scheduled(every = "1s")
     public void ping() {
 
         // TODO message loss

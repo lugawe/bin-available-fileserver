@@ -28,6 +28,8 @@ public class ScheduledChaosService {
     @ConfigProperty(name = "node.id")
     private String nodeId;
 
+    private boolean firstRun = true;
+
     public ScheduledChaosService() {}
 
     private void inContext(Runnable r) {
@@ -38,6 +40,15 @@ public class ScheduledChaosService {
 
     @Scheduled(every = "30s", delay = 30, delayUnit = TimeUnit.SECONDS)
     public void maybeDisable() {
+        if(firstRun){
+            try {
+                Thread.sleep((int)(Math.random()*3000));
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            firstRun = false;
+        }
         double v = ThreadLocalRandom.current().nextDouble();
         inContext(() -> {
             if (v < 0.4) {
