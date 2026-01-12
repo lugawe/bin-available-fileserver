@@ -21,6 +21,9 @@ import template.quarkus.common.Events;
 import template.quarkus.common.election.ElectionService.Request;
 import template.quarkus.common.election.ElectionService.Response;
 import template.quarkus.common.election.ElectionServiceRegistry;
+import template.quarkus.common.endpoint.EndpointRESTService;
+import template.quarkus.common.endpoint.EndpointService;
+import template.quarkus.common.endpoint.EndpointServiceRegistry;
 
 @ApplicationScoped
 public class ElectionService {
@@ -41,8 +44,18 @@ public class ElectionService {
 
     @Inject
     private StorageService storageService;
+
+    @Inject
+    private EndpointServiceRegistry endpointServiceRegistry;
+
+    private EndpointRESTService endpointRESTService;
     
     public ElectionService() {}
+
+    @PostConstruct
+    public void init() {
+        endpointRESTService = endpointServiceRegistry.createEndpointRESTService();
+    }
 
     public boolean isMain() {
         return localNodeId.equals(mainNodeId);
@@ -100,6 +113,9 @@ public class ElectionService {
                 log.info("{}: Die node {} ist statt mir main", myRole(), mainNodeId);
             }
         }
+
+        endpointRESTService.updateEndpoint(new EndpointService.Request(mainNodeId));
+
         nodeStateService.setMainIsDead(false);
         return true;
     }
