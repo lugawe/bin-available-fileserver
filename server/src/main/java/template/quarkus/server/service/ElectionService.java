@@ -7,6 +7,7 @@ import io.quarkus.scheduler.Scheduled;
 import io.quarkus.vertx.ConsumeEvent;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -34,8 +35,7 @@ public class ElectionService {
     @ConfigProperty(name = "node.id")
     private String localNodeId;
 
-    @ConfigProperty(name = "node.replicas")
-    private List<String> replicas;
+    private List<String> replicas = new ArrayList<>(Arrays.asList("tuxedo-laptop:8081","tuxedo-laptop:8082","tuxedo-laptop:8083"));
     
     @ConfigProperty(name = "node.main")
     private String mainNodeId;
