@@ -41,7 +41,12 @@ public class CLI implements QuarkusApplication {
                 restClient.fileService().write(new FileEntry(FILE_NAME, content));
             } else if ("read".equals(splitted[0])) {
                 FileEntry fileEntry = restClient.fileService().read(FILE_NAME);
-                log.info("File {}: {}", fileEntry.name(), new String(fileEntry.bytes(), StandardCharsets.UTF_8));
+                byte[] bytes = fileEntry.bytes();
+                if (bytes != null) {
+                    log.info("File {}: {}", fileEntry.name(), new String(bytes, StandardCharsets.UTF_8));
+                } else {
+                    log.info("File {}: {}", fileEntry.name(), "Leer");
+                }
             }
         }
         return 0;
