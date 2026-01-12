@@ -38,14 +38,25 @@ public class CLI implements QuarkusApplication {
             String[] splitted = cmd.split(" ");
             if ("write".equals(splitted[0])) {
                 byte[] content = splitted[1].getBytes(StandardCharsets.UTF_8);
-                restClient.fileService().write(new FileEntry(FILE_NAME, content));
+                try {
+                    restClient.fileService().write(new FileEntry(FILE_NAME, content));
+                } catch (Exception e) {
+                    log.error("Connection down", e);
+                }
             } else if ("read".equals(splitted[0])) {
-                FileEntry fileEntry = restClient.fileService().read(FILE_NAME);
-                byte[] bytes = fileEntry.bytes();
-                if (bytes != null) {
-                    log.info("File {}: {}", fileEntry.name(), new String(bytes, StandardCharsets.UTF_8));
-                } else {
-                    log.info("File {}: {}", fileEntry.name(), "Leer");
+                FileEntry fileEntry = null;
+                try {
+                    fileEntry = restClient.fileService().read(FILE_NAME);
+                } catch (Exception e) {
+                    log.error("Connection down", e);
+                }
+                if (fileEntry != null) {
+                    byte[] bytes = fileEntry.bytes();
+                    if (bytes != null) {
+                        log.info("File {}: {}", fileEntry.name(), new String(bytes, StandardCharsets.UTF_8));
+                    } else {
+                        log.info("File {}: {}", fileEntry.name(), "Leer");
+                    }
                 }
             }
         }
