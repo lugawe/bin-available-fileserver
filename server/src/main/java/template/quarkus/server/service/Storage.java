@@ -27,7 +27,7 @@ public class Storage {
     public int writeReplicaUpdate(UpdateEntry message) {
         if (message.untilVersion() < latestVersion) {
             log.error("Jüngere version: schwerer Fehler");
-            return -2;
+            return 0;
         }
         if (message.untilVersion() - latestVersion == 0) return 0;
         if (message.afterVersion() - latestVersion != 0) {
