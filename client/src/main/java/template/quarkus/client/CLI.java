@@ -16,6 +16,8 @@ public class CLI implements QuarkusApplication {
 
     private static final Logger log = LoggerFactory.getLogger(CLI.class);
 
+    private static final String FILE_NAME = "file.txt";
+
     private final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
 
     @Inject
@@ -33,7 +35,14 @@ public class CLI implements QuarkusApplication {
         String cmd = null;
         while (!"exit".equals(cmd)) {
             cmd = readLine();
-            restClient.fileService().write(new FileEntry(cmd, "content".getBytes(StandardCharsets.UTF_8)));
+            String[] splitted = cmd.split(" ");
+            if ("write".equals(splitted[0])) {
+                byte[] content = splitted[1].getBytes(StandardCharsets.UTF_8);
+                restClient.fileService().write(new FileEntry(FILE_NAME, content));
+            } else if ("read".equals(splitted[0])) {
+                FileEntry fileEntry = restClient.fileService().read(FILE_NAME);
+                log.info("File {}: {}", fileEntry.name(), new String(fileEntry.bytes(), StandardCharsets.UTF_8));
+            }
         }
         return 0;
     }
