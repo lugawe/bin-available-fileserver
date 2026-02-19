@@ -22,7 +22,7 @@
         <encoding>UTF-8</encoding>
         <java.version>21</java.version>
         <!-- dependencies -->
-        <quarkus.version>3.30.6</quarkus.version>
+        <quarkus.version>3.32.0</quarkus.version>
         <!-- maven plugins -->
         <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
